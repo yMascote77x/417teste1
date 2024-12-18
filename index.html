@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Arquivos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload de Arquivos</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required />
+            <button type="submit" id="uploadButton">Enviar Arquivo</button>
+        </form>
+        <div id="response"></div>
+    </div>
+    <script>
+        const form = document.getElementById('uploadForm');
+        const responseDiv = document.getElementById('response');
+        const fileInput = document.getElementById('fileInput');
+        const uploadButton = document.getElementById('uploadButton');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita o comportamento padrão do formulário
+            responseDiv.textContent = 'Enviando arquivo...';
+
+            // Desabilita o botão para evitar múltiplos envios
+            uploadButton.disabled = true;
+
+            const formData = new FormData(form);
+            try {
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    responseDiv.innerHTML = `
+                        <p>${data.message}</p>
+                        <p>Link para download: <strong>${data.fileUrl}</strong></p>
+                    `;
+                } else {
+                    responseDiv.textContent = data.error || 'Erro ao enviar o arquivo.';
+                }
+            } catch (error) {
+                responseDiv.textContent = 'Erro inesperado ao enviar o arquivo.';
+            } finally {
+                // Reabilita o botão após o envio
+                uploadButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
